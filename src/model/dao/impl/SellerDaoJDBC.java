@@ -17,7 +17,7 @@ import model.entities.Seller;
 
 public class SellerDaoJDBC implements SellerDao {
 	private Connection conn;
-	
+
 	public SellerDaoJDBC(Connection conn) {
 		this.conn = conn;
 	}
@@ -25,19 +25,19 @@ public class SellerDaoJDBC implements SellerDao {
 	@Override
 	public void insert(Seller obj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void update(Seller obj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteById(Integer id) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -45,28 +45,25 @@ public class SellerDaoJDBC implements SellerDao {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT seller.*,department.Name as DepName "
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id "
-					+ "WHERE seller.Id = ? ");
+			st = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName " + "FROM seller INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " + "WHERE seller.Id = ? ");
 			st.setInt(1, id);
 			rs = st.executeQuery();
-			if ( rs.next() ) {
+			if (rs.next()) {
 				Department department = instantiateDepartment(rs);
-				Seller seller = instantiateSeller(rs,department);				
+				Seller seller = instantiateSeller(rs, department);
 				return seller;
-				
+
 			}
 			return null;
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}
-		finally {
+		} finally {
 			DB.closeStatement(st);
-			DB.closeResultSet(rs);			
+			DB.closeResultSet(rs);
 		}
-		
+
 	}
 
 	private Seller instantiateSeller(ResultSet rs, Department department) throws SQLException {
@@ -88,8 +85,34 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName " 
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id " 
+					+ "ORDER BY Name");
+			rs = st.executeQuery();
+			List<Seller> sellers = new ArrayList<Seller>();
+			Map<Integer, Department> departments = new HashMap<>();
+			while (rs.next()) {
+				Department departmentTmp = departments.get(rs.getInt("DepartmentID"));
+				if (departmentTmp == null) {
+					departmentTmp = instantiateDepartment(rs);
+					departments.put(rs.getInt("DepartmentID"), departmentTmp);
+				}
+
+				sellers.add(instantiateSeller(rs, departmentTmp));
+
+			}
+			return sellers;
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 	@Override
@@ -97,33 +120,29 @@ public class SellerDaoJDBC implements SellerDao {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT seller.*,department.Name as DepName "
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id "
-					+ "WHERE DepartmentId = ? "
-					+ "ORDER BY Name");
+			st = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName " + "FROM seller INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " + "WHERE DepartmentId = ? " + "ORDER BY Name");
 			st.setInt(1, department.getId());
 			rs = st.executeQuery();
 			List<Seller> sellers = new ArrayList<Seller>();
 			Map<Integer, Department> departments = new HashMap<>();
-			while ( rs.next() ) {
+			while (rs.next()) {
 				Department departmentTmp = departments.get(rs.getInt("DepartmentID"));
 				if (departmentTmp == null) {
 					departmentTmp = instantiateDepartment(rs);
 					departments.put(rs.getInt("DepartmentID"), departmentTmp);
 				}
-				
-				sellers.add(instantiateSeller(rs, departmentTmp));				
-				
+
+				sellers.add(instantiateSeller(rs, departmentTmp));
+
 			}
 			return sellers;
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}
-		finally {
+		} finally {
 			DB.closeStatement(st);
-			DB.closeResultSet(rs);			
+			DB.closeResultSet(rs);
 		}
 	}
 

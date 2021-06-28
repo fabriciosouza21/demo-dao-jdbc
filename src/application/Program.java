@@ -17,7 +17,7 @@ public class Program {
 		
 		Seller seller =  sellerDao.findById(3);
 		Department department = new Department(2, null);
-		sellers = sellerDao.findByDepartment(department);
+		sellers = sellerDao.findAll();
 		
 		for (Seller s : sellers) {
 			System.out.println(s);
