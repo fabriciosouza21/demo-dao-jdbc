@@ -16,9 +16,7 @@ public class Program {
 		List<Seller> sellers = new ArrayList<Seller>();
 		SellerDao sellerDao =  DaoFactory.createSellerDao();
 		Seller seller ;
-		seller = sellerDao.findById(1);
-		seller.setName("graial teste");
-		sellerDao.update(seller);
+		sellerDao.deleteById(1);
 		System.out.println("ok!");
 		
 		
